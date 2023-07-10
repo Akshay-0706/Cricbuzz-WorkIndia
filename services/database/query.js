@@ -57,8 +57,35 @@ query.createMatch = (match) =>
 
 query.getMatchSchedules = () =>
     new Promise((resolve, reject) => {
-        db.query("select match_id, team_1, team_2, date, venue from cmatch",
+        db.query("select match_id, team_1, team_2, date, venue, status from cmatch",
             (err, res) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(res);
+            });
+    });
+
+query.createTeam = (team) =>
+    new Promise((resolve, reject) => {
+        db.query("insert into team(team_id, name) values(?, ?)",
+            [
+                team.team_id,
+                team.name
+            ], (err, res) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(res);
+            });
+    });
+
+query.teamExists = (name) =>
+    new Promise((resolve, reject) => {
+        db.query("select team_id from team where name = ?",
+            [
+                name
+            ], (err, res) => {
                 if (err)
                     reject(err);
                 else
@@ -96,11 +123,11 @@ query.addTeamMember = (player) =>
             });
     });
 
-query.getPlayerStats = (player) =>
+query.getPlayerStats = (player_id) =>
     new Promise((resolve, reject) => {
         db.query("select player_id, name, matches_played, runs, average, strike_rate from player where player_id = ?",
             [
-                player.player_id
+                player_id
             ], (err, res) => {
                 if (err)
                     reject(err);
@@ -108,3 +135,5 @@ query.getPlayerStats = (player) =>
                     resolve(res);
             });
     });
+
+module.exports = query;
