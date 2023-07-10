@@ -1,5 +1,6 @@
 const query = require('../services/database/query');
 const hash = require('../services/hash');
+const jwt = require('../services/jwt');
 
 let admin = {};
 let min = 100000
@@ -26,13 +27,24 @@ admin.signup = async (req, res) => {
 
 // todo
 admin.login = async (req, res) => {
-    query.loginUser()
+    let hashed = await hash.encrypt(req.body.password);
+    console.log(hashed);
+    res.body.password = hashed;
+    query.loginUser(req.body)
         .then((result) => {
             console.log(result);
-            res.send(result);
+            res.send({
+                "status": "Login successful",
+                "status_code": 200,
+                "user_id": result[0].user_id.toString(),
+                "access_token": jwt.create(req.body.username, req.body.password).toString()
+            });
         })
         .catch((err) => {
-            res.status(500).send(err);
+            res.status(401).send({
+                "status": "Incorrect username/password provided. Please retry",
+                "status_code": 401
+            });
         });
 };
 
@@ -111,24 +123,6 @@ admin.createMatch = async (req, res) => {
             console.log(err);
             res.status(500).send(err);
         });
-
-    // query.teamExists(req.team_2)
-    //     .then((result) => {
-    //         console.log(result);
-    //         res.send(result);
-    //     })
-    //     .catch((err) => {
-    //         res.status(500).send(err);
-    //     });
-
-    // query.createMatch()
-    //     .then((result) => {
-    //         console.log(result);
-    //         res.send(result);
-    //     })
-    //     .catch((err) => {
-    //         res.status(500).send(err);
-    //     });
 };
 
 module.exports = admin;

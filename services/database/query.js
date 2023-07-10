@@ -29,8 +29,26 @@ query.loginUser = (user) =>
                 if (err)
                     reject(err);
                 else {
-                    console.log(res);
-                    resolve(res);
+                    if (res.length != 0) {
+                        db.query("select * from user where username = ? and password = ?",
+                            [
+                                user.username,
+                                user.password,
+                            ], (err, res) => {
+                                if (err)
+                                    reject(err);
+                                else {
+                                    if (res.length != 0) {
+                                        console.log(res);
+                                        resolve(res);
+                                    }
+                                    else
+                                        reject(err);
+                                }
+                            });
+                    }
+                    else
+                        reject(err);
                 }
             });
     });
@@ -93,11 +111,11 @@ query.teamExists = (name) =>
             });
     });
 
-query.getTeamDetails = (team) =>
+query.getTeamDetails = (team_id) =>
     new Promise((resolve, reject) => {
         db.query("select player.player_id, player.name from cmatch join player on cmatch.team_1_id = player.team_id where cmatch.team_1_id = ?",
             [
-                team.team_id
+                team_id
             ], (err, res) => {
                 if (err)
                     reject(err);
