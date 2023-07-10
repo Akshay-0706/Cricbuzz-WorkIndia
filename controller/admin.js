@@ -28,11 +28,9 @@ admin.signup = async (req, res) => {
 // todo
 admin.login = async (req, res) => {
     let hashed = await hash.encrypt(req.body.password);
-    console.log(hashed);
-    res.body.password = hashed;
+    req.body.password = hashed;
     query.loginUser(req.body)
         .then((result) => {
-            console.log(result);
             res.send({
                 "status": "Login successful",
                 "status_code": 200,
